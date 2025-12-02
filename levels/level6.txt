@@ -1,0 +1,9 @@
+WWWWWWWWWWWWWWWW
+W 1      P     2W
+W WWWWWWWWWWWWWW
+W W            W
+W W   a    b   W
+W W            W
+W WWWWWWWWWWWWWW
+W              E
+WWWWWWWWWWWWWWWW
