@@ -26,8 +26,6 @@ class GameViewModel:
             self._init_level(self.current_level_index)
             self.reset_game_state()
 
-
-
     def next_level(self):
         """Kazanma ekranından bir sonraki bölümün hikayesine geçer."""
         self.current_level_index += 1
