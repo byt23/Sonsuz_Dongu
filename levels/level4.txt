@@ -1,9 +1,9 @@
 WWWWWWWWWWWWWWWW
-W P            W
-W WWWWWWWWWWWWWW
+W 1          P W
+W WWWWWWWWWWWW W
 W W          W W
-W W    1     a W
+W a          b W
 W W          W W
 W WWWWWWWWWWWW W
-W              E
+W E            W
 WWWWWWWWWWWWWWWW
