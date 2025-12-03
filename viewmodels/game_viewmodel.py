@@ -1,25 +1,20 @@
 import pygame
 import os
-from models.entity import Entity, Player, Ghost, Wall, Button, Door, Exit # Player eklendi
+from models.entity import Entity, Player, Ghost, Wall, Button, Door, Exit
 from utils.settings import *
 
 class GameViewModel:
     def __init__(self):
-        # Listeler
         self.ghosts = [] 
         self.walls = []
         self.buttons = []
         self.doors = []
         self.exit_point = None
         self.start_pos = (100, 100)
-        
-        # Level Yönetimi
         self.current_level_index = 1
-        # Başlangıçta Hikaye (Briefing) moduyla açılıyor
         self.state = "BRIEFING" 
         
     def start_level(self):
-        """Hikaye ekranından oyuna geçişi sağlar."""
         if self.state == "BRIEFING":
             print(f"--- LEVEL {self.current_level_index} BAŞLATILIYOR ---")
             self.state = "PLAYING"
@@ -27,19 +22,14 @@ class GameViewModel:
             self.reset_game_state()
 
     def next_level(self):
-        """Kazanma ekranından bir sonraki bölümün hikayesine geçer."""
         self.current_level_index += 1
-        # 7. leveldan sonra BÖLÜM 1 SONU ekranına geçer
         if self.current_level_index in STORY_TEXTS and self.current_level_index <= 7:
              self.state = "BRIEFING" 
-             print(f"Level {self.current_level_index} hikayesi gösteriliyor...")
         else:
              self.state = "GAME_FINISHED"
 
     def _init_level(self, level_num):
-        """Level dosyasını okur ve objeleri yaratır."""
         print(f"--- HARİTA YÜKLENİYOR... ---")
-        
         self.walls = []
         self.buttons = []
         self.doors = []
@@ -48,7 +38,6 @@ class GameViewModel:
 
         try:
             file_path = os.path.join("levels", f"level{level_num}.txt")
-            
             with open(file_path, 'r') as f:
                 lines = f.readlines()
                 
@@ -57,27 +46,15 @@ class GameViewModel:
                     x = col_index * TILE_SIZE
                     y = row_index * TILE_SIZE
                     
-                    if char == 'W':
-                        self.walls.append(Wall(x, y, COLOR_WALL))
-                    elif char == 'P':
-                        self.start_pos = (x, y)
-                    elif char == 'E':
-                        self.exit_point = Exit(x, y, COLOR_EXIT)
-                    
-                    # SİSTEM 1
-                    elif char == '1':
-                        self.buttons.append(Button(x, y, COLOR_BUTTON_1, link_id=1))
-                    elif char == 'a':
-                        self.doors.append(Door(x, y, COLOR_DOOR_1, link_id=1))
-                    
-                    # SİSTEM 2
-                    elif char == '2':
-                        self.buttons.append(Button(x, y, COLOR_BUTTON_2, link_id=2))
-                    elif char == 'b':
-                        self.doors.append(Door(x, y, COLOR_DOOR_2, link_id=2))
+                    if char == 'W': self.walls.append(Wall(x, y, COLOR_WALL))
+                    elif char == 'P': self.start_pos = (x, y)
+                    elif char == 'E': self.exit_point = Exit(x, y, COLOR_EXIT)
+                    elif char == '1': self.buttons.append(Button(x, y, COLOR_BUTTON_1, link_id=1))
+                    elif char == 'a': self.doors.append(Door(x, y, COLOR_DOOR_1, link_id=1))
+                    elif char == '2': self.buttons.append(Button(x, y, COLOR_BUTTON_2, link_id=2))
+                    elif char == 'b': self.doors.append(Door(x, y, COLOR_DOOR_2, link_id=2))
 
             print("--- HARİTA BAŞARIYLA OKUNDU ---")
-
         except FileNotFoundError:
             print("Level dosyası bulunamadı!")
             self.state = "GAME_FINISHED"
@@ -86,17 +63,16 @@ class GameViewModel:
     def reset_game_state(self):
         if self.state == "PLAYING":
             start_x, start_y = self.start_pos
-            
-            # BURASI DEĞİŞTİ: Artık 'Entity' değil 'Player' sınıfı kullanılıyor.
             self.player = Player(start_x, start_y, COLOR_PLAYER)
-            
             self.current_frame = 0
             self.is_loop_ended = False
 
     def full_restart(self):
         self.ghosts = [] 
         self.state = "PLAYING"
-        for btn in self.buttons: btn.is_pressed = False
+        for btn in self.buttons: 
+            btn.is_pressed = False
+            btn.was_occupied = False # Restart atınca hafızayı sil
         for door in self.doors: door.is_open = False
         self.reset_game_state()
         print(f"LEVEL {self.current_level_index} RESETLENDİ")
@@ -113,8 +89,6 @@ class GameViewModel:
             self.player.rect = next_rect
 
     def _can_move_to(self, rect):
-        # --- DÜZELTME BURADA YAPILDI ---
-        # Eskiden SCREEN_WIDTH kullanıyorduk, şimdi VIRTUAL_WIDTH kullanıyoruz.
         if rect.left < 0 or rect.right > VIRTUAL_WIDTH or rect.top < 0 or rect.bottom > VIRTUAL_HEIGHT:
             return False
 
@@ -144,16 +118,32 @@ class GameViewModel:
         self.current_frame += 1
 
     def _update_mechanics(self):
-        # Butonlar
+        """AÇ/KAPA (TOGGLE) MANTIĞI"""
+        
         for button in self.buttons:
-            button.is_pressed = False
-            if self.player.rect.colliderect(button.rect): button.is_pressed = True
-            for ghost in self.ghosts:
-                if ghost.rect.colliderect(button.rect): button.is_pressed = True
+            # 1. Şu an üzerinde biri var mı kontrol et
+            is_currently_occupied = False
             
+            if self.player.rect.colliderect(button.rect):
+                is_currently_occupied = True
+            
+            for ghost in self.ghosts:
+                if ghost.rect.colliderect(button.rect):
+                    is_currently_occupied = True
+            
+            # 2. TOGGLE MANTIĞI:
+            # Eğer şu an biri üzerindeyse VE bir önceki karede kimse yoksa
+            # Bu "Yeni Basıldı" demektir -> Durumu değiştir.
+            if is_currently_occupied and not button.was_occupied:
+                button.is_pressed = not button.is_pressed # True ise False, False ise True yap
+            
+            # 3. Şimdiki durumu kaydet (Bir sonraki kare için 'geçmiş' olacak)
+            button.was_occupied = is_currently_occupied
+            
+            # Renk Ayarı (Görsel için)
             button.color = COLOR_BUTTON_PRESSED if button.is_pressed else (COLOR_BUTTON_1 if button.link_id == 1 else COLOR_BUTTON_2)
 
-        # Kapılar
+        # Kapıları güncelle
         for door in self.doors:
             linked_btn = next((b for b in self.buttons if b.link_id == door.link_id), None)
             if linked_btn and linked_btn.is_pressed:
