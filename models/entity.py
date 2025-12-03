@@ -13,7 +13,7 @@ class Entity:
 class Player(Entity):
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
-        # Karakter Hitbox: 50px
+        # Hitbox ayarı
         hitbox_size = 50 
         offset = (TILE_SIZE - hitbox_size) // 2
         self.rect = pygame.Rect(x + offset, y + offset, hitbox_size, hitbox_size)
@@ -38,11 +38,10 @@ class Button(Entity):
     def __init__(self, x, y, color, link_id):
         super().__init__(x, y, color)
         self.link_id = link_id
-        self.is_pressed = False
         
-        # --- BUTON KÜÇÜLTME ---
-        # 80px karenin içinde 40px buton olsun (Yarısı)
-        # Kenarlardan 20'şer piksel kırpıyoruz
+        self.is_pressed = False   # Butonun AÇIK/KAPALI durumu (Işık gibi)
+        self.was_occupied = False # YENİ: Bir önceki karede üzerinde biri var mıydı?
+        
         shrink = 20 
         self.rect = self.rect.inflate(-shrink*2, -shrink*2)
 
