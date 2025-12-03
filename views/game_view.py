@@ -5,15 +5,29 @@ from utils.settings import *
 class GameView:
     def __init__(self):
         pygame.init()
+        
+        # Ekran bilgileri
         self.display_info = pygame.display.Info()
         self.desktop_w = self.display_info.current_w
         self.desktop_h = self.display_info.current_h
+        
+        # 1. Başlangıç: Pencere Modu
         self.screen = pygame.display.set_mode((VIRTUAL_WIDTH, VIRTUAL_HEIGHT), pygame.RESIZABLE)
-        pygame.display.set_caption("Time-Loop Co-op: Kronos Protocol")
+        pygame.display.set_caption("Time-Loop Co-op: Kronos Protocol") # Oyun Başlığı
+        
+        # 2. Sanal Tuval
         self.canvas = pygame.Surface((VIRTUAL_WIDTH, VIRTUAL_HEIGHT))
         self.fullscreen = False
         
-        font_path = os.path.join("assets", "font.ttf") 
+        # --- 3. FONT TANIMLAMASI ---
+        # Kod 'assets/font.ttf' dosyasını arar. Bulamazsa Arial kullanır.
+        # MUTLAK YOL (Absolute Path) kullanıyoruz
+        current_script_path = os.path.abspath(__file__)
+        views_folder = os.path.dirname(current_script_path)
+        self.project_root = os.path.dirname(views_folder)
+        font_path = os.path.join(self.project_root, "assets", "font.ttf")
+        
+        # Varsayılan Fontlar
         self.ui_font = pygame.font.SysFont("Arial", 24, bold=True)
         self.story_font = pygame.font.SysFont("Arial", 28, bold=True)
         self.big_font = pygame.font.SysFont("Arial", 60, bold=True)
@@ -24,50 +38,53 @@ class GameView:
                 self.story_font = pygame.font.Font(font_path, 30)
                 self.big_font = pygame.font.Font(font_path, 60)
             else:
-                print("UYARI: font.ttf bulunamadı, Arial kullanılıyor.")
+                print("WARNING: font.ttf not found, using Arial.")
         except Exception as e:
-            print(f"KRİTİK FONT HATASI: {e}")
+            print(f"CRITICAL FONT ERROR: {e}")
 
+        # 4. Görselleri Yükle
         self.assets = {}
         self._load_assets()
+        
+        # 5. Işıklandırma Katmanı
         self.darkness = pygame.Surface((VIRTUAL_WIDTH, VIRTUAL_HEIGHT), pygame.SRCALPHA)
 
     def _load_assets(self):
-        """Resimleri yükler ve boyutlandırır."""
-        img_dir = os.path.join("assets", "images")
+        """Resimleri assets/images klasöründen yükler."""
+        img_dir = os.path.join(self.project_root, "assets", "images")
+        
         files = {
-            "wall": "wall.png", "floor": "floor.png", "player": "player.png",
-            "exit": "exit.png", "button": "button.png"
+            "wall": "wall.png", 
+            "floor": "floor.png",
+            "player": "player.png",
+            "exit": "exit.png",
+            "button": "button.png",
+            "clock_icon": "clock_icon.png",
+            "level_icon": "level_icon.png"
         }
-        print("--- GÖRSELLER YÜKLENİYOR ---")
+        
+        print("--- LOADING ASSETS ---")
         for key, filename in files.items():
             path = os.path.join(img_dir, filename)
             try:
                 img = pygame.image.load(path).convert_alpha()
                 
-                # --- BOYUTLANDIRMA AYARLARI ---
                 if key == "player":
-                    # Karakter: %60 (Küçük ve zarif)
-                    size = int(TILE_SIZE * 0.6)
-                    img = pygame.transform.scale(img, (size, size))
-                
+                    char_size = int(TILE_SIZE * 0.6) 
+                    img = pygame.transform.scale(img, (char_size, char_size))
+                elif key in ["clock_icon", "level_icon"]:
+                    img = pygame.transform.scale(img, (40, 40))
                 elif key in ["button", "exit"]:
-                    # Objeler: %70 (Daha içeride dursunlar)
                     size = int(TILE_SIZE * 0.7)
                     img = pygame.transform.scale(img, (size, size))
-                    
-                elif key == "wall":
-                    # --- DÜZELTME BURADA: Duvar artık %100 (Bitişik) ---
-                    img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
-                    
                 else:
-                    # Zemin: %100 (Tam kaplamalı)
                     img = pygame.transform.scale(img, (TILE_SIZE, TILE_SIZE))
                 
                 self.assets[key] = img
-                print(f"[OK] {filename} yüklendi.")
+                print(f"[OK] {filename}")
             except FileNotFoundError:
-                print(f"[HATA] {filename} bulunamadı! Kare çizilecek.")
+                if key not in ["clock_icon", "level_icon"]:
+                    print(f"[ERROR] {filename} not found!")
                 self.assets[key] = None
 
     def toggle_fullscreen_mode(self):
@@ -83,20 +100,29 @@ class GameView:
         pygame.display.flip()
 
     def _draw_on_canvas(self, data):
+        """Tüm çizimleri sanal tuvale yapar."""
         state = data["state"]
+        
         if state == "BRIEFING":
             self.canvas.fill((5, 5, 10)); self._draw_briefing(data); return
         elif state == "GAME_FINISHED":
-            self.canvas.fill((0, 0, 0)); self._draw_centered_text("TEBRİKLER! OYUN BİTTİ.", (0, 255, 255), 0); return
+            self.canvas.fill((0, 0, 0)); 
+            # İNGİLİZCE MESAJLAR
+            self._draw_centered_text("DATA UPLOAD COMPLETE...", (0, 255, 0), -80); 
+            self._draw_centered_text("SUBJECT 404: SUCCESSFUL.", (0, 255, 0), -30); 
+            
+            text = self.big_font.render("TO BE CONTINUED...", True, (255, 255, 255))
+            text_rect = text.get_rect(center=(VIRTUAL_WIDTH/2, VIRTUAL_HEIGHT/2 + 60))
+            self.canvas.blit(text, text_rect)
+            return
         
-        # 1. Zemin
+        # --- OYUN ÇİZİMİ (AYNI KALIYOR) ---
         if self.assets.get("floor"):
             for row in range(VIRTUAL_HEIGHT // TILE_SIZE + 1):
                 for col in range(VIRTUAL_WIDTH // TILE_SIZE + 1):
                     self.canvas.blit(self.assets["floor"], (col * TILE_SIZE, row * TILE_SIZE))
         else: self.canvas.fill(COLOR_BG)
 
-        # 2. Kablolar
         for button in data["buttons"]:
             linked_door = next((d for d in data["doors"] if d.link_id == button.link_id), None)
             if linked_door:
@@ -108,36 +134,26 @@ class GameView:
                 pygame.draw.circle(self.canvas, wire_color, start_pos, 6)
                 pygame.draw.circle(self.canvas, wire_color, end_pos, 6)
 
-        # 3. Duvarlar (Artık Tam Boyut)
         for wall in data["walls"]: 
-            if self.assets.get("wall"):
-                # rect.center kullanmaya gerek yok çünkü tam boyut
-                self.canvas.blit(self.assets["wall"], wall.rect)
+            if self.assets.get("wall"): self.canvas.blit(self.assets["wall"], wall.rect)
             else: pygame.draw.rect(self.canvas, wall.color, wall.rect)
 
-        # 4. Çıkış (Ortalanmış)
         if data["exit"]: 
             if self.assets.get("exit"):
-                img_rect = self.assets["exit"].get_rect(center=data["exit"].rect.center)
-                self.canvas.blit(self.assets["exit"], img_rect)
+                self.canvas.blit(self.assets["exit"], data["exit"].rect)
             else: pygame.draw.rect(self.canvas, data["exit"].color, data["exit"].rect)
         
-        # 5. Butonlar (Ortalanmış ve Renkli)
         for button in data["buttons"]: 
             if self.assets.get("button"):
                 btn_img = self.assets["button"].copy()
                 btn_img.fill(button.color, special_flags=pygame.BLEND_MULT)
-                img_rect = btn_img.get_rect(center=button.rect.center)
-                self.canvas.blit(btn_img, img_rect)
+                self.canvas.blit(btn_img, button.rect)
             else: pygame.draw.rect(self.canvas, button.color, button.rect)
 
-        # 6. Kapılar (Blok Halinde - Olduğu Gibi Korumalı)
         for door in data["doors"]:
-            d_rect = door.rect.inflate(-10, -10) # Kapıları biraz içeride tut
-            if door.is_open: pygame.draw.rect(self.canvas, COLOR_DOOR_OPEN, d_rect, 4) 
-            else: pygame.draw.rect(self.canvas, door.color, d_rect) 
+            if door.is_open: pygame.draw.rect(self.canvas, COLOR_DOOR_OPEN, door.rect, 4) 
+            else: pygame.draw.rect(self.canvas, door.color, door.rect) 
         
-        # 7. Karakter ve Hayaletler (Ortalanmış)
         for ghost in data["ghosts"]:
             if self.assets.get("player"):
                 ghost_img = self.assets["player"].copy()
@@ -156,23 +172,40 @@ class GameView:
                 self.canvas.blit(self.assets["player"], img_rect)
             else: pygame.draw.rect(self.canvas, data["player"].color, data["player"].rect)
 
-        # 8. Işıklandırma
+        # Işıklandırma
         self._apply_lighting(data)
 
-        # 9. UI
-        time_text = self.ui_font.render(f"Zaman: {data['time_left']}", True, COLOR_TEXT)
-        self.canvas.blit(time_text, (20, 20))
-        level_text = self.ui_font.render(f"Bölüm: {data['level_index']}", True, (255, 255, 0))
-        self.canvas.blit(level_text, (VIRTUAL_WIDTH - 200, 20))
-        fs_text = self.story_font.render("'F' -> Tam Ekran / 'ESC' -> Çık", True, (100, 100, 100))
+        # --- UI (İNGİLİZCE GÜNCELLEME) ---
+        
+        # Zaman -> TIME
+        time_text = self.ui_font.render(f"TIME: {data['time_left']}", True, COLOR_TEXT)
+        time_x = 20
+        if self.assets.get("clock_icon"):
+            self.canvas.blit(self.assets["clock_icon"], (20, 20))
+            time_x = 70
+        self.canvas.blit(time_text, (time_x, 25))
+        
+        # Bölüm -> LEVEL
+        level_text = self.ui_font.render(f"LEVEL: {data['level_index']}", True, (255, 255, 0))
+        text_w = level_text.get_width()
+        level_x = VIRTUAL_WIDTH - text_w - 30
+        if self.assets.get("level_icon"):
+            icon_x = VIRTUAL_WIDTH - 60
+            self.canvas.blit(self.assets["level_icon"], (icon_x, 20))
+            level_x -= 50
+        self.canvas.blit(level_text, (level_x, 25))
+        
+        # Alt Bilgi -> Fullscreen / Exit
+        fs_text = self.story_font.render("'F': Fullscreen / 'ESC': Quit", True, (100, 100, 100))
         self.canvas.blit(fs_text, (20, VIRTUAL_HEIGHT - 40))
 
+        # Oyun Sonu Mesajları
         if state == "WON":
-            self._draw_centered_text("BOLUM TAMAMLANDI!", (100, 255, 100), -40)
-            self._draw_centered_text("'SPACE' ile Devam Et", (255, 255, 255), 40)
+            self._draw_centered_text("LEVEL COMPLETE!", (100, 255, 100), -40)
+            self._draw_centered_text("Press 'SPACE' to Continue", (255, 255, 255), 40)
         elif state == "GAME_OVER":
-            self._draw_centered_text("PARADOKS!", (255, 50, 50), -40)
-            self._draw_centered_text("'R' ile Tekrar Dene", (255, 255, 255), 40)
+            self._draw_centered_text("PARADOX!", (255, 50, 50), -40)
+            self._draw_centered_text("Press 'R' to Retry", (255, 255, 255), 40)
 
     def _apply_lighting(self, data):
         self.darkness.fill((0, 0, 0, 255)) 
@@ -184,7 +217,7 @@ class GameView:
 
     def _draw_briefing(self, data):
         level_idx = data["level_index"]
-        story_lines = STORY_TEXTS.get(level_idx, ["Hazır?", "SPACE bas."])
+        story_lines = STORY_TEXTS.get(level_idx, ["Ready?", "Press SPACE."])
         total_height = len(story_lines) * 40
         start_y = (VIRTUAL_HEIGHT - total_height) / 2
         for i, line in enumerate(story_lines):
