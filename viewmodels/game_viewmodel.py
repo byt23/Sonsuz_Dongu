@@ -1,6 +1,6 @@
 import pygame
 import os
-from models.entity import Entity, Ghost, Wall, Button, Door, Exit
+from models.entity import Entity, Player, Ghost, Wall, Button, Door, Exit # Player eklendi
 from utils.settings import *
 
 class GameViewModel:
@@ -88,7 +88,10 @@ class GameViewModel:
     def reset_game_state(self):
         if self.state == "PLAYING":
             start_x, start_y = self.start_pos
-            self.player = Entity(start_x, start_y, COLOR_PLAYER)
+            
+            # BURASI DEĞİŞTİ: Artık 'Entity' değil 'Player' sınıfı kullanılıyor.
+            self.player = Player(start_x, start_y, COLOR_PLAYER)
+            
             self.current_frame = 0
             self.is_loop_ended = False
 
