@@ -150,9 +150,32 @@ class GameView:
                 self.canvas.blit(btn_img, button.rect)
             else: pygame.draw.rect(self.canvas, button.color, button.rect)
 
+        # --- 6. KAPILAR (GÜNCELLENMİŞ TASARIM) ---
         for door in data["doors"]:
-            if door.is_open: pygame.draw.rect(self.canvas, COLOR_DOOR_OPEN, door.rect, 4) 
-            else: pygame.draw.rect(self.canvas, door.color, door.rect) 
+            # Kapıların rengini belirle (Açıkken de kendi rengini korusun)
+            # Kapı açıksa sadece çerçeve çiz (width=6), kapalıysa içini doldur (width=0)
+            
+            # Renk seçimi: Buton/Kapı ID'sine göre orijinal rengi al
+            if door.link_id == 1: draw_color = COLOR_DOOR_1
+            elif door.link_id == 2: draw_color = COLOR_DOOR_2
+            elif door.link_id == 3: draw_color = COLOR_DOOR_3
+            else: draw_color = (200, 200, 200) # Hata olursa gri
+
+            if door.is_open:
+                # AÇIK: Sadece kalın bir çerçeve çiz, içi zemin görünsün
+                pygame.draw.rect(self.canvas, draw_color, door.rect, 6)
+                
+                # Ekstra Görsellik: Köşelere küçük noktalar koy (Vida gibi)
+                pygame.draw.circle(self.canvas, draw_color, door.rect.topleft, 4)
+                pygame.draw.circle(self.canvas, draw_color, door.rect.topright, 4)
+                pygame.draw.circle(self.canvas, draw_color, door.rect.bottomleft, 4)
+                pygame.draw.circle(self.canvas, draw_color, door.rect.bottomright, 4)
+            else: 
+                # KAPALI: Tam dolu blok çiz
+                pygame.draw.rect(self.canvas, draw_color, door.rect)
+                # Kapalı olduğunu belli etmek için ortasına X veya çizgi atabiliriz
+                pygame.draw.line(self.canvas, (0,0,0), door.rect.topleft, door.rect.bottomright, 3)
+                pygame.draw.line(self.canvas, (0,0,0), door.rect.bottomleft, door.rect.topright, 3)
         
         for ghost in data["ghosts"]:
             if self.assets.get("player"):

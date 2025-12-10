@@ -12,11 +12,14 @@ class GameViewModel:
         self.exit_point = None
         self.start_pos = (100, 100)
         self.current_level_index = 1
-        self.state = "BRIEFING" 
+        self.state = "BRIEFING"
+        
+        # YENİ: O anki levelin maksimum süresini tutacak değişken
+        self.current_level_max_time = DEFAULT_DURATION 
         
     def start_level(self):
         if self.state == "BRIEFING":
-            print(f"--- LEVEL {self.current_level_index} BAŞLATILIYOR ---")
+            print(f"--- STARTING LEVEL {self.current_level_index} ---")
             self.state = "PLAYING"
             self._init_level(self.current_level_index)
             self.reset_game_state()
@@ -29,12 +32,17 @@ class GameViewModel:
              self.state = "GAME_FINISHED"
 
     def _init_level(self, level_num):
-        print(f"--- HARİTA YÜKLENİYOR... ---")
+        print(f"--- LOADING MAP... ---")
         self.walls = []
         self.buttons = []
         self.doors = []
         self.ghosts = [] 
         self.exit_point = None
+
+        # --- YENİ: LEVEL SÜRESİNİ AYARLA ---
+        # Settings'den bu level için belirlenen süreyi al, yoksa varsayılanı kullan
+        self.current_level_max_time = LEVEL_DURATIONS.get(level_num, DEFAULT_DURATION)
+        print(f"Level Duration Set To: {self.current_level_max_time} frames")
 
         try:
             file_path = os.path.join("levels", f"level{level_num}.txt")
@@ -49,14 +57,22 @@ class GameViewModel:
                     if char == 'W': self.walls.append(Wall(x, y, COLOR_WALL))
                     elif char == 'P': self.start_pos = (x, y)
                     elif char == 'E': self.exit_point = Exit(x, y, COLOR_EXIT)
+                    
+                    # ID 1: RED
                     elif char == '1': self.buttons.append(Button(x, y, COLOR_BUTTON_1, link_id=1))
                     elif char == 'a': self.doors.append(Door(x, y, COLOR_DOOR_1, link_id=1))
+                    
+                    # ID 2: BLUE
                     elif char == '2': self.buttons.append(Button(x, y, COLOR_BUTTON_2, link_id=2))
                     elif char == 'b': self.doors.append(Door(x, y, COLOR_DOOR_2, link_id=2))
+                    
+                    # ID 3: GREEN
+                    elif char == '3': self.buttons.append(Button(x, y, COLOR_BUTTON_3, link_id=3))
+                    elif char == 'c': self.doors.append(Door(x, y, COLOR_DOOR_3, link_id=3))
 
-            print("--- HARİTA BAŞARIYLA OKUNDU ---")
+            print("--- MAP LOADED SUCCESSFULLY ---")
         except FileNotFoundError:
-            print("Level dosyası bulunamadı!")
+            print("Level file not found!")
             self.state = "GAME_FINISHED"
             self.walls = []
 
@@ -72,10 +88,10 @@ class GameViewModel:
         self.state = "PLAYING"
         for btn in self.buttons: 
             btn.is_pressed = False
-            btn.was_occupied = False # Restart atınca hafızayı sil
+            btn.was_occupied = False 
         for door in self.doors: door.is_open = False
         self.reset_game_state()
-        print(f"LEVEL {self.current_level_index} RESETLENDİ")
+        print(f"LEVEL {self.current_level_index} RESET")
 
     def handle_input(self, dx, dy):
         if self.state != "PLAYING": return
@@ -103,7 +119,8 @@ class GameViewModel:
     def update(self):
         if self.state != "PLAYING": return
 
-        if self.current_frame >= LOOP_DURATION:
+        # --- YENİ: Sabit LOOP_DURATION yerine dinamik süreyi kullan ---
+        if self.current_frame >= self.current_level_max_time:
             self.create_time_loop()
             return
 
@@ -118,10 +135,7 @@ class GameViewModel:
         self.current_frame += 1
 
     def _update_mechanics(self):
-        """AÇ/KAPA (TOGGLE) MANTIĞI"""
-        
         for button in self.buttons:
-            # 1. Şu an üzerinde biri var mı kontrol et
             is_currently_occupied = False
             
             if self.player.rect.colliderect(button.rect):
@@ -131,19 +145,18 @@ class GameViewModel:
                 if ghost.rect.colliderect(button.rect):
                     is_currently_occupied = True
             
-            # 2. TOGGLE MANTIĞI:
-            # Eğer şu an biri üzerindeyse VE bir önceki karede kimse yoksa
-            # Bu "Yeni Basıldı" demektir -> Durumu değiştir.
             if is_currently_occupied and not button.was_occupied:
-                button.is_pressed = not button.is_pressed # True ise False, False ise True yap
+                button.is_pressed = not button.is_pressed
             
-            # 3. Şimdiki durumu kaydet (Bir sonraki kare için 'geçmiş' olacak)
             button.was_occupied = is_currently_occupied
             
-            # Renk Ayarı (Görsel için)
-            button.color = COLOR_BUTTON_PRESSED if button.is_pressed else (COLOR_BUTTON_1 if button.link_id == 1 else COLOR_BUTTON_2)
+            if button.is_pressed:
+                button.color = COLOR_BUTTON_PRESSED
+            else:
+                if button.link_id == 1: button.color = COLOR_BUTTON_1
+                elif button.link_id == 2: button.color = COLOR_BUTTON_2
+                elif button.link_id == 3: button.color = COLOR_BUTTON_3
 
-        # Kapıları güncelle
         for door in self.doors:
             linked_btn = next((b for b in self.buttons if b.link_id == door.link_id), None)
             if linked_btn and linked_btn.is_pressed:
@@ -151,7 +164,9 @@ class GameViewModel:
                 door.color = COLOR_DOOR_OPEN
             else:
                 door.is_open = False
-                door.color = COLOR_DOOR_1 if door.link_id == 1 else COLOR_DOOR_2
+                if door.link_id == 1: door.color = COLOR_DOOR_1
+                elif door.link_id == 2: door.color = COLOR_DOOR_2
+                elif door.link_id == 3: door.color = COLOR_DOOR_3
 
     def _check_game_status(self):
         if self.exit_point and self.player.rect.colliderect(self.exit_point.rect):
@@ -167,6 +182,9 @@ class GameViewModel:
         self.reset_game_state()
 
     def get_render_data(self):
+        # UI'da kalan süreyi doğru göstermek için dinamik süreyi kullan
+        time_left = self.current_level_max_time - self.current_frame if hasattr(self, 'current_frame') else 0
+        
         return {
             "player": getattr(self, 'player', None),
             "ghosts": self.ghosts,
@@ -174,7 +192,7 @@ class GameViewModel:
             "buttons": self.buttons,
             "doors": self.doors,
             "exit": self.exit_point,
-            "time_left": LOOP_DURATION - self.current_frame if hasattr(self, 'current_frame') else 0,
+            "time_left": time_left, # Güncellendi
             "state": self.state,
             "level_index": self.current_level_index
         }
