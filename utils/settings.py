@@ -6,22 +6,19 @@ VIRTUAL_HEIGHT = 720
 FPS = 60
 TILE_SIZE = 80 
 
-# --- SÜRE AYARLARI (YENİ) ---
-# Eğer listede olmayan bir level gelirse bu varsayılan süre kullanılır
-DEFAULT_DURATION = 10 * 60  # 10 Saniye
-
-# Her Level İçin Özel Süre (Saniye x 60)
+# --- SÜRE AYARLARI ---
+DEFAULT_DURATION = 10 * 60 
 LEVEL_DURATIONS = {
-    1: 15 * 60,  # Level 1: 15 Saniye (Alışma)
-    2: 10 * 60,  # Level 2: 10 Saniye (Hızlı olmalı)
-    3: 20 * 60,  # Level 3: 20 Saniye (Daha karmaşık)
-    4: 12 * 60,  # Level 4: 12 Saniye
-    5: 15 * 60,  # Level 5: 15 Saniye
-    6: 25 * 60,  # Level 6: 25 Saniye
-    7: 30 * 60   # Level 7: 30 Saniye (Final)
+    1: 6 * 60,
+    2: 7 * 60,
+    3: 5.5 * 60,
+    4: 11 * 60,
+    5: 10 * 60,
+    6: 13 * 60,
+    7: 6 * 60
 }
 
-# Renkler
+# --- RENKLER ---
 COLOR_BG = (20, 20, 30)
 COLOR_PLAYER = (50, 200, 50)
 COLOR_GHOST = (150, 150, 150)
@@ -29,20 +26,29 @@ COLOR_WALL = (80, 80, 100)
 COLOR_EXIT = (0, 255, 255)
 COLOR_TEXT = (255, 255, 255)
 
-# ID: 1 (Kırmızı)
+# ID 1: RED (Kırmızı)
 COLOR_BUTTON_1 = (200, 50, 50)
 COLOR_DOOR_1   = (150, 100, 50)
 
-# ID: 2 (Mavi)
+# ID 2: BLUE (Mavi)
 COLOR_BUTTON_2 = (50, 50, 200)
 COLOR_DOOR_2   = (50, 150, 200)
 
-# ID: 3 (Yeşil)
-COLOR_BUTTON_3 = (50, 200, 50)
-COLOR_DOOR_3   = (20, 100, 20)
+# ID 3: YELLOW (Sarı)
+COLOR_BUTTON_3 = (255, 215, 0)
+COLOR_DOOR_3   = (180, 150, 0)
 
+# ID 4: PINK (Pembe - GÜNCELLENDİ)
+COLOR_BUTTON_4 = (255, 105, 180) # Canlı Pembe
+COLOR_DOOR_4   = (180, 60, 120)  # Koyu/Mat Pembe (Kapı)
+
+# ID 5: PURPLE (Mor)
+COLOR_BUTTON_5 = (160, 32, 240)
+COLOR_DOOR_5   = (100, 20, 150)
+
+# Ortak
 COLOR_DOOR_OPEN = (40, 40, 40)
-COLOR_BUTTON_PRESSED = (0, 200, 0)
+COLOR_BUTTON_PRESSED = (0, 200, 0) # Basılınca Yeşil olur
 
 # STORY TEXTS (ENGLISH)
 STORY_TEXTS = {
