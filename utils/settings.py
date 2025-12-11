@@ -1,63 +1,62 @@
 # utils/settings.py
 
-# --- GÜNCELLEME: ZOOM ETKİSİ İÇİN TILE_SIZE = 80 ---
+# --- EKRAN AYARLARI ---
 VIRTUAL_WIDTH = 1280
 VIRTUAL_HEIGHT = 720
 FPS = 60
-TILE_SIZE = 80 # <-- BURASI 80 YAPILDI!
-LOOP_DURATION = 450
+TILE_SIZE = 80 
 
-# Renkler (Aynı kalıyor)
+# --- SÜRE AYARLARI ---
+DEFAULT_DURATION = 10 * 60 
+LEVEL_DURATIONS = {
+    1: 6 * 60,
+    2: 7 * 60,
+    3: 5.5 * 60,
+    4: 11 * 60,
+    5: 10 * 60,
+    6: 13 * 60,
+    7: 6 * 60
+}
+
+# --- RENKLER ---
 COLOR_BG = (20, 20, 30)
 COLOR_PLAYER = (50, 200, 50)
 COLOR_GHOST = (150, 150, 150)
 COLOR_WALL = (80, 80, 100)
 COLOR_EXIT = (0, 255, 255)
 COLOR_TEXT = (255, 255, 255)
+
+# ID 1: RED (Kırmızı)
 COLOR_BUTTON_1 = (200, 50, 50)
 COLOR_DOOR_1   = (150, 100, 50)
+
+# ID 2: BLUE (Mavi)
 COLOR_BUTTON_2 = (50, 50, 200)
 COLOR_DOOR_2   = (50, 150, 200)
-COLOR_DOOR_OPEN = (40, 40, 40)
-COLOR_BUTTON_PRESSED = (0, 200, 0)
 
-# --- 7 BÖLÜMLÜK HİKAYE METİNLERİ ---
+# ID 3: YELLOW (Sarı)
+COLOR_BUTTON_3 = (255, 215, 0)
+COLOR_DOOR_3   = (180, 150, 0)
+
+# ID 4: PINK (Pembe - GÜNCELLENDİ)
+COLOR_BUTTON_4 = (255, 105, 180) # Canlı Pembe
+COLOR_DOOR_4   = (180, 60, 120)  # Koyu/Mat Pembe (Kapı)
+
+# ID 5: PURPLE (Mor)
+COLOR_BUTTON_5 = (160, 32, 240)
+COLOR_DOOR_5   = (100, 20, 150)
+
+# Ortak
+COLOR_DOOR_OPEN = (40, 40, 40)
+COLOR_BUTTON_PRESSED = (0, 200, 0) # Basılınca Yeşil olur
+
+# STORY TEXTS (ENGLISH)
 STORY_TEXTS = {
-    1: [
-        "SEVIYE 1: BASLANGIC", "", "Denek 404, Kronos Simulasyonuna hos geldin.",
-        "Gecmisteki hareketlerin, gelecegini sekillendirir.",
-        "", "Gorev: Kirmizi sistemi coz ve alis.",
-        "(Baslamak icin SPACE tusuna bas)"
-    ],
-    2: [
-        "SEVIYE 2: GOLGE", "", "Gecmiste yaptigin her hareket kayit altinda.",
-        "Ona yol ac, yoksa ikiniz de silinirsiniz.",
-        "", "Gorev: Gecmisteki haline kapiyi actir.",
-    ],
-    3: [
-        "SEVIYE 3: IKILI MANTIK", "", "Mavi Guvenlik Protokolu devrede.",
-        "Biri kirmiziyi tutarken, digeri maviyi gececek.",
-        "", "Gorev: Iki sistemi de kullanarak cikisa ulas.",
-    ],
-    4: [
-        "SEVIYE 4: GUVEN TESTI", "", "Buton ve kapi arasindaki mesafe cok fazla.",
-        "Ilk turda sadece butona bas ve bekle. Kendine guven.",
-        "", "Ipucu: Sabirli ol.",
-    ],
-    5: [
-        "SEVIYE 5: DARBOGAZ", "", "Koridorlar daraldi. Carpismalar paradoks yaratir.",
-        "Gecmisteki halinle ayni karede duramazsin.",
-        "", "Dikkat: Hayaletine dokunma.",
-    ],
-    6: [
-        "SEVIYE 6: SENKRON", "", "Zamanlama her seydir. Iki kapi ayni anda acilmak zorunda.",
-        "Milisaniyelik bir hata, donguyu basa sarar.",
-        "", "Gorev: Ayni anda iki butona bas.",
-    ],
-    7: [
-        "SEVIYE 7: SON SINAV", "", "Cikis kapisi gorundu. Bu son engel.",
-        "Tum sistemler aktif. Tum zamanlar ic ice.",
-        "Bunu gecersen ozgur kalacaksin... sanirim.",
-        "", "Gorev: Hepsini birlestir ve donguyu kir.",
-    ]
+    1: ["CHAPTER 1: AWAKENING", "", "System: Kronos Protocol v1.0 Initializing...", "Subject 404, consciousness uploaded.", "Your past actions shape your future.", "", "Objective: Solve the Red system and adapt.", "(Press SPACE to Start)"],
+    2: ["CHAPTER 2: THE SHADOW", "", "You are not alone. Do you see that gray silhouette?", "That is you. Or what remains of you.", "Clear the path for it, or you both get deleted.", "", "Objective: Have your past self open the door."],
+    3: ["CHAPTER 3: BINARY LOGIC", "", "Blue Security Protocol engaged.", "You must now manage two different timelines.", "One holds the Red, while the other passes the Blue.", "", "Objective: Use both systems to reach the exit."],
+    4: ["CHAPTER 4: TRUST TEST", "", "The distance between the button and door is too great.", "In the first loop, simply press the button and wait.", "If you don't trust yourself, you will never leave.", "", "Hint: Be patient."],
+    5: ["CHAPTER 5: BOTTLENECK", "", "Corridors have narrowed. Collisions create paradoxes.", "You cannot occupy the same space as your past self.", "Make way, step aside, plan ahead.", "", "Caution: Do not touch your ghost."],
+    6: ["CHAPTER 6: SYNCHRONIZATION", "", "Timing is everything.", "Two doors must open simultaneously.", "A millisecond error resets the loop.", "", "Objective: Press two buttons at the same time."],
+    7: ["CHAPTER 7: FINAL EXAM", "", "The exit is in sight. This is the final hurdle.", "All systems active. All timelines intertwined.", "Pass this, and you will be free... I suppose.", "", "Objective: Combine everything and break the loop."]
 }
