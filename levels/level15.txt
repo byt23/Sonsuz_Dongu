@@ -1,8 +1,8 @@
 WWWWWWWWWWWWWWWW
-W 1 2 P 3 4 5  W
-W      B       W
-W L    L     L W
-W a    b     c W
-W L    L     L W
-W d    e     E W
+W     1   2    W
+W   L     L    W
+W P   a   b  B W
+W   L     L    W
+W     3   4    W
+W     c   d  E W
 WWWWWWWWWWWWWWWW

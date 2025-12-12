@@ -26,9 +26,20 @@ TEXTS = {
         "PRESS_ENTER": "Basla: [ENTER]",
         "CHANGE_LANG": "Dil: [L]",
         
+        # FİNAL EKRANI (YENİ)
+        "END_TITLE": "SIMULASYON KIRILDI",
+        "END_BODY": "Tebrikler Denek 404.\nSonsuz donguyu kirmayi basardin.\nArtik ozgursun.\n\nOynadigin icin tesekkurler.",
+        "CREDITS": "Yapimci: BYT1907",
+        "BACK_MENU": "ANA MENUYE DON",
+
+        # Hikayeler
         "S1": ["BOLUM 1: UYANIS", "", "Sistem: Kronos Protokolu...", "Denek 404 yuklendi.", "Gorev: Kirmizi sistemi coz."],
         "S2": ["BOLUM 2: YANKI", "", "Yalniz degilsin.", "O gri siluet sensin.", "Gorev: Gecmisinle kapiyi ac."],
         "S3": ["BOLUM 3: IKILI MANTIK", "", "Mavi Guvenlik devrede.", "Iki zaman cizgisini yonet.", "Gorev: Iki sistemi de kullan."],
+        "S4": ["BOLUM 4: GUVEN TESTI", "", "Mesafe cok fazla.", "Ilk tur: Sadece bas ve bekle.", "Ipucu: Sabirli ol."],
+        "S5": ["BOLUM 5: DARBOGAZ", "", "Koridorlar daraldi.", "Carpismadan kac.", "Dikkat: Hayaletine dokunma."],
+        "S6": ["BOLUM 6: SENKRONIZASYON", "", "Zamanlama her seydir.", "Iki kapi ayni anda.", "Gorev: Ayni anda bas."],
+        "S7": ["BOLUM 7: SON SINAV", "", "Cikis gorundu.", "Donguyu kir.", "Gorev: Hepsini birlestir."],
     },
 
     # --- İNGİLİZCE (EN) ---
@@ -58,6 +69,12 @@ TEXTS = {
         "PRESS_ENTER": "Start: [ENTER]",
         "CHANGE_LANG": "Language: [L]",
 
+        # FİNAL EKRANI (YENİ)
+        "END_TITLE": "SIMULATION BREACHED",
+        "END_BODY": "Congratulations Subject 404.\nYou have broken the endless loop.\nYou are now free.\n\nThanks for playing.",
+        "CREDITS": "Created by: BYT1907",
+        "BACK_MENU": "RETURN TO MENU",
+
         "S1": ["CHAPTER 1: AWAKENING", "", "System: Kronos Protocol...", "Subject 404 uploaded.", "Objective: Solve Red system."],
         "S2": ["CHAPTER 2: THE ECHO", "", "You are not alone.", "That silhouette is you.", "Objective: Open door with past self."],
         "S3": ["CHAPTER 3: BINARY LOGIC", "", "Blue Security engaged.", "Manage two timelines.", "Objective: Use both systems."],
@@ -67,14 +84,14 @@ TEXTS = {
     "DE": {
         "GAME_TITLE": "KRONOS PROTOKOLL",
         "GAME_SUBTITLE": "Zeitschleifen Initiative",
-        "START_GAME": "SPIEL STARTEN",  # <-- EKLENDİ
-        "LEVELS": "LEVEL",            # <-- EKLENDİ
-        "QUIT": "BEENDEN",            # <-- EKLENDİ
+        "START_GAME": "SPIEL STARTEN",
+        "LEVELS": "LEVEL",
+        "QUIT": "BEENDEN",
         "BACK": "< ZURUCK",
         "SELECT_LEVEL": "LEVEL WAHLEN",
         "PAUSED": "PAUSE",
-        "RESUME": "WEITER",           # <-- EKLENDİ
-        "MAIN_MENU": "HAUPTMENU",     # <-- EKLENDİ
+        "RESUME": "WEITER",
+        "MAIN_MENU": "HAUPTMENU",
         "LEVEL_SELECT": "LEVELAUSWAHL",
         "LEVEL": "LEVEL",
         "TIME": "ZEIT",
@@ -89,6 +106,11 @@ TEXTS = {
         "INTRO_STORY": "Jahr 2084. Subjekt 404.\nBewusstsein hochgeladen.\n\nZiel: Kooperiere mit deinem vergangenen Ich.",
         "PRESS_ENTER": "Starten: [ENTER]",
         "CHANGE_LANG": "Sprache: [L]",
+        
+        "END_TITLE": "SIMULATION BEENDET", 
+        "END_BODY": "Du bist frei.", 
+        "CREDITS": "Entwickler: BYT1907", 
+        "BACK_MENU": "HAUPTMENU",
 
         "S1": ["KAPITEL 1: ERWACHEN", "", "System: Kronos Protokoll...", "Subjekt 404 geladen.", "Ziel: Lose das Rote System."],
         "S2": ["KAPITEL 2: DAS ECHO", "", "Du bist nicht allein.", "Diese Silhouette bist du.", "Ziel: Offne die Tur mit deinem Ich."],
@@ -99,14 +121,14 @@ TEXTS = {
     "FR": {
         "GAME_TITLE": "PROTOCOLE KRONOS",
         "GAME_SUBTITLE": "Initiative Boucle Temporelle",
-        "START_GAME": "JOUER",        # <-- EKLENDİ
-        "LEVELS": "NIVEAUX",          # <-- EKLENDİ
-        "QUIT": "QUITTER",            # <-- EKLENDİ
+        "START_GAME": "JOUER",
+        "LEVELS": "NIVEAUX",
+        "QUIT": "QUITTER",
         "BACK": "< RETOUR",
         "SELECT_LEVEL": "CHOISIR NIVEAU",
         "PAUSED": "PAUSE",
-        "RESUME": "REPRENDRE",        # <-- EKLENDİ
-        "MAIN_MENU": "MENU PRINCIPAL",# <-- EKLENDİ
+        "RESUME": "REPRENDRE",
+        "MAIN_MENU": "MENU PRINCIPAL",
         "LEVEL_SELECT": "SELECTION NIVEAU",
         "LEVEL": "NIVEAU",
         "TIME": "TEMPS",
@@ -121,6 +143,11 @@ TEXTS = {
         "INTRO_STORY": "Annee 2084. Sujet 404.\nConscience telechargee.\n\nObjectif: Cooperez avec votre moi passe.",
         "PRESS_ENTER": "Commencer: [ENTREE]",
         "CHANGE_LANG": "Langue: [L]",
+        
+        "END_TITLE": "SIMULATION TERMINEE", 
+        "END_BODY": "Tu es libre.", 
+        "CREDITS": "Createur: BYT1907", 
+        "BACK_MENU": "MENU PRINCIPAL",
 
         "S1": ["CHAPITRE 1: L'EVEIL", "", "Systeme: Protocole Kronos...", "Sujet 404 charge.", "Objectif: Resoudre le systeme Rouge."],
         "S2": ["CHAPITRE 2: L'ECHO", "", "Tu n'es pas seul.", "Cette silhouette, c'est toi.", "Objectif: Ouvre la porte avec ton passe."],
@@ -131,14 +158,14 @@ TEXTS = {
     "ES": {
         "GAME_TITLE": "PROTOCOLO KRONOS",
         "GAME_SUBTITLE": "Iniciativa Bucle Temporal",
-        "START_GAME": "JUGAR",        # <-- EKLENDİ
-        "LEVELS": "NIVELES",          # <-- EKLENDİ
-        "QUIT": "SALIR",              # <-- EKLENDİ
+        "START_GAME": "JUGAR",
+        "LEVELS": "NIVELES",
+        "QUIT": "SALIR",
         "BACK": "< ATRAS",
         "SELECT_LEVEL": "SELECCIONAR NIVEL",
         "PAUSED": "PAUSA",
-        "RESUME": "CONTINUAR",        # <-- EKLENDİ
-        "MAIN_MENU": "MENU PRINCIPAL",# <-- EKLENDİ
+        "RESUME": "CONTINUAR",
+        "MAIN_MENU": "MENU PRINCIPAL",
         "LEVEL_SELECT": "SELECCION DE NIVEL",
         "LEVEL": "NIVEL",
         "TIME": "TIEMPO",
@@ -153,6 +180,11 @@ TEXTS = {
         "INTRO_STORY": "Ano 2084. Sujeto 404.\nConciencia cargada.\n\nObjetivo: Coopera con tu yo pasado.",
         "PRESS_ENTER": "Comenzar: [ENTRAR]",
         "CHANGE_LANG": "Idioma: [L]",
+        
+        "END_TITLE": "SIMULACION TERMINADA", 
+        "END_BODY": "Eres libre.", 
+        "CREDITS": "Creador: BYT1907", 
+        "BACK_MENU": "MENU PRINCIPAL",
 
         "S1": ["CAPITULO 1: EL DESPERTAR", "", "Sistema: Protocolo Kronos...", "Sujeto 404 cargado.", "Objetivo: Resuelve el sistema Rojo."],
         "S2": ["CAPITULO 2: EL ECO", "", "No estas solo.", "Esa silueta eres tu.", "Objetivo: Abre la puerta con tu pasado."],
@@ -160,4 +192,4 @@ TEXTS = {
     }
 }
 
-STORY_TEXTS = {} # Fallback
+STORY_TEXTS = {}
