@@ -1,123 +1,119 @@
 import pygame
 import os
-from models.entity import Entity, Player, Ghost, Wall, Button, Door, Exit
+from models.entity import Player, Ghost, Wall, Button, Door, Exit, Box, Laser
 from utils.settings import *
 from utils.save_manager import SaveManager
+from utils.localization import TEXTS 
 
 class GameViewModel:
-    def __init__(self):
-        self.ghosts = [] 
-        self.walls = []
-        self.buttons = []
-        self.doors = []
+    def __init__(self, model=None):
+        self.state = "INTRO"
+        
+        self.ghosts = []; self.walls = []; self.buttons = []
+        self.doors = []; self.boxes = []; self.lasers = []
         self.exit_point = None
+        
+        self.player = Player(100, 100, COLOR_PLAYER)
         self.start_pos = (100, 100)
+        
         self.current_level_index = 1
         self.current_level_max_time = DEFAULT_DURATION
-        self.state = "MENU" 
+        self.current_frame = 0 
+        self.is_loop_ended = False
+        self.sound_queue = []
+        
+        self.languages = ["TR", "EN", "DE", "FR", "ES"]
+        self.lang_index = 0
+        self.texts = TEXTS["TR"]
+        
         self.save_data = SaveManager.load_data()
         self.unlocked_levels = self.save_data.get("unlocked_levels", 1)
 
+    def cycle_language(self):
+        self.lang_index = (self.lang_index + 1) % len(self.languages)
+        lang_code = self.languages[self.lang_index]
+        self.texts = TEXTS[lang_code]
+
     def process_click(self, action):
-        if action == "START_GAME":
+        if not action: return
+        
+        if self.state == "INTRO": self.state = "MENU"
+        elif action == "START_GAME":
             self.current_level_index = self.unlocked_levels
-            if self.current_level_index > 7: self.current_level_index = 1
+            if self.current_level_index > 15: self.current_level_index = 1
             self.start_level_sequence()
-        elif action == "OPEN_LEVELS":
-            self.state = "LEVEL_SELECT"
-        elif action == "QUIT_GAME":
-            return "QUIT"
-        elif action == "BACK_TO_MENU":
-            self.state = "MENU"
-        elif action == "RESUME_GAME":
-            self.state = "PLAYING"
-        elif action == "PAUSE_TO_LEVELS":
-            self.state = "LEVEL_SELECT"
-        elif action == "PAUSE_TO_MENU":
-            self.state = "MENU" # ANA MENÜYE DÖN
+        elif action == "OPEN_LEVELS": self.state = "LEVEL_SELECT"
+        elif action == "QUIT_GAME": return "QUIT"
+        elif action == "CHANGE_LANGUAGE": self.cycle_language()
+        elif action == "RESUME_GAME": self.state = "PLAYING"
+        elif action == "PAUSE_TO_LEVELS": self.state = "LEVEL_SELECT"
+        elif action == "PAUSE_TO_MENU": self.state = "MENU"
+        elif action == "BACK_TO_MENU": self.state = "MENU"
         elif action.startswith("LEVEL_"):
-            lvl = int(action.split("_")[1])
-            if lvl <= self.unlocked_levels:
-                self.current_level_index = lvl
-                self.start_level_sequence()
+            try:
+                lvl = int(action.split("_")[1])
+                if lvl <= self.unlocked_levels:
+                    self.current_level_index = lvl
+                    self.start_level_sequence()
+            except: pass
 
-    def toggle_pause(self):
-        if self.state == "PLAYING": self.state = "PAUSED"
-        elif self.state == "PAUSED": self.state = "PLAYING"
-
-    def start_level_sequence(self):
-        if self.current_level_index in STORY_TEXTS: self.state = "BRIEFING"
-        else: self.start_level_gameplay()
-
-    def start_level_gameplay(self):
-        self.state = "PLAYING"
-        self._init_level(self.current_level_index)
-        self.reset_game_state()
-
-    def next_level(self):
-        SaveManager.save_progress(self.current_level_index)
-        self.unlocked_levels = SaveManager.load_data()["unlocked_levels"]
-        self.current_level_index += 1
-        if self.current_level_index in STORY_TEXTS and self.current_level_index <= 7: self.state = "BRIEFING" 
-        elif self.current_level_index > 7: self.state = "GAME_FINISHED" 
-        else: self.start_level_gameplay()
-
-    def _init_level(self, level_num):
-        self.current_level_max_time = LEVEL_DURATIONS.get(level_num, DEFAULT_DURATION)
-        self.walls = []
-        self.buttons = []
-        self.doors = []
-        self.ghosts = [] 
-        self.exit_point = None
-        try:
-            file_path = os.path.join("levels", f"level{level_num}.txt")
-            with open(file_path, 'r') as f:
-                lines = f.readlines()
-            for row_index, line in enumerate(lines):
-                for col_index, char in enumerate(line):
-                    x = col_index * TILE_SIZE
-                    y = row_index * TILE_SIZE
-                    if char == 'W': self.walls.append(Wall(x, y, COLOR_WALL))
-                    elif char == 'P': self.start_pos = (x, y)
-                    elif char == 'E': self.exit_point = Exit(x, y, COLOR_EXIT)
-                    elif char == '1': self.buttons.append(Button(x, y, COLOR_BUTTON_1, 1))
-                    elif char == 'a': self.doors.append(Door(x, y, COLOR_DOOR_1, 1))
-                    elif char == '2': self.buttons.append(Button(x, y, COLOR_BUTTON_2, 2))
-                    elif char == 'b': self.doors.append(Door(x, y, COLOR_DOOR_2, 2))
-                    elif char == '3': self.buttons.append(Button(x, y, COLOR_BUTTON_3, 3))
-                    elif char == 'c': self.doors.append(Door(x, y, COLOR_DOOR_3, 3))
-        except FileNotFoundError:
-            self.state = "MENU"
-
-    def reset_game_state(self):
-        start_x, start_y = self.start_pos
-        self.player = Player(start_x, start_y, COLOR_PLAYER)
-        self.current_frame = 0
-        self.is_loop_ended = False
-
-    def full_restart(self):
-        self.ghosts = [] 
-        self.state = "PLAYING"
-        for btn in self.buttons: 
-            btn.is_pressed = False
-            btn.was_occupied = False 
-        for door in self.doors: door.is_open = False
-        self.reset_game_state()
-
+    # --- HAREKET MANTIĞI (DÜZELTİLDİ: Kaygan Hareket) ---
     def handle_input(self, dx, dy):
-        if self.state != "PLAYING": return
-        if self.is_loop_ended: return
-        next_rect = self.player.rect.copy()
-        next_rect.x += dx * 5
-        next_rect.y += dy * 5
-        if self._can_move_to(next_rect): self.player.rect = next_rect
+        if self.state != "PLAYING" or self.is_loop_ended: return
+        if dx == 0 and dy == 0: return
 
-    def _can_move_to(self, rect):
+        speed = 6 # Hızı biraz artırdım, daha akıcı olsun diye
+        
+        # 1. Önce X Ekseninde Hareket Dene
+        if dx != 0:
+            next_rect_x = self.player.rect.copy()
+            next_rect_x.x += dx * speed
+            
+            # Kutu İtme (X Ekseni)
+            can_move_x = True
+            for box in self.boxes:
+                if next_rect_x.colliderect(box.rect):
+                    box_next = box.rect.copy()
+                    box_next.x += dx * speed
+                    if self._check_collision(box_next, is_box=True):
+                        box.rect = box_next
+                        self.sound_queue.append("push")
+                    else:
+                        can_move_x = False
+            
+            if can_move_x and self._check_collision(next_rect_x):
+                self.player.rect = next_rect_x
+
+        # 2. Sonra Y Ekseninde Hareket Dene
+        if dy != 0:
+            next_rect_y = self.player.rect.copy()
+            next_rect_y.y += dy * speed
+            
+            # Kutu İtme (Y Ekseni)
+            can_move_y = True
+            for box in self.boxes:
+                if next_rect_y.colliderect(box.rect):
+                    box_next = box.rect.copy()
+                    box_next.y += dy * speed
+                    if self._check_collision(box_next, is_box=True):
+                        box.rect = box_next
+                        if "push" not in self.sound_queue: # Ses tekrarını önle
+                            self.sound_queue.append("push")
+                    else:
+                        can_move_y = False
+            
+            if can_move_y and self._check_collision(next_rect_y):
+                self.player.rect = next_rect_y
+
+    def _check_collision(self, rect, is_box=False):
         if rect.left < 0 or rect.right > VIRTUAL_WIDTH or rect.top < 0 or rect.bottom > VIRTUAL_HEIGHT: return False
         for wall in self.walls:
             if rect.colliderect(wall.rect): return False
         for door in self.doors:
             if not door.is_open and rect.colliderect(door.rect): return False
+        if is_box:
+            for other in self.boxes:
+                if rect.colliderect(other.rect) and rect != other.rect: return False
         return True
 
     def update(self):
@@ -125,6 +121,7 @@ class GameViewModel:
         if self.current_frame >= self.current_level_max_time:
             self.create_time_loop()
             return
+        
         self.player.record_position()
         for ghost in self.ghosts: ghost.update_position_from_history(self.current_frame)
         self._update_mechanics()
@@ -132,42 +129,114 @@ class GameViewModel:
         self.current_frame += 1
 
     def _update_mechanics(self):
+        cycle = 180
+        laser_active = (self.current_frame % cycle) < (cycle // 2)
+        for laser in self.lasers: laser.active = laser_active
+
         for button in self.buttons:
-            occupied = self.player.rect.colliderect(button.rect) or any(g.rect.colliderect(button.rect) for g in self.ghosts)
-            if occupied and not button.was_occupied: button.is_pressed = not button.is_pressed
-            button.was_occupied = occupied
-            if button.is_pressed: button.color = COLOR_BUTTON_PRESSED
-            else:
-                if button.link_id == 1: button.color = COLOR_BUTTON_1
-                elif button.link_id == 2: button.color = COLOR_BUTTON_2
-                elif button.link_id == 3: button.color = COLOR_BUTTON_3
+            collides = self.player.rect.colliderect(button.rect)
+            for g in self.ghosts:
+                if g.rect.colliderect(button.rect): collides = True
+            for b in self.boxes:
+                if b.rect.colliderect(button.rect): collides = True
+            
+            if collides and not button.was_occupied:
+                button.is_pressed = not button.is_pressed
+                self.sound_queue.append("click")
+            button.was_occupied = collides
+            button.color = COLOR_BUTTON_PRESSED if button.is_pressed else (200,200,200)
+
         for door in self.doors:
             btn = next((b for b in self.buttons if b.link_id == door.link_id), None)
             if btn and btn.is_pressed: door.is_open = True
             else: door.is_open = False
-            if door.link_id == 1: door.color = COLOR_DOOR_1
-            elif door.link_id == 2: door.color = COLOR_DOOR_2
-            elif door.link_id == 3: door.color = COLOR_DOOR_3
 
     def _check_game_status(self):
-        if self.exit_point and self.player.rect.colliderect(self.exit_point.rect): self.state = "WON"
+        if self.exit_point and self.player.rect.colliderect(self.exit_point.rect):
+            self.state = "WON"
+            self.sound_queue.append("win")
+            return
         for ghost in self.ghosts:
-            if self.player.rect.colliderect(ghost.rect): self.state = "GAME_OVER"
+            if self.player.rect.colliderect(ghost.rect):
+                self.state = "GAME_OVER"
+                self.sound_queue.append("glitch")
+                return
+        for laser in self.lasers:
+            if laser.active and self.player.rect.colliderect(laser.rect):
+                self.state = "GAME_OVER"
+                self.sound_queue.append("glitch")
+                return
 
     def create_time_loop(self):
         self.ghosts.append(Ghost(self.player.history, COLOR_GHOST))
         self.reset_game_state()
 
+    def start_level_sequence(self):
+        key = f"S{self.current_level_index}"
+        if key in self.texts: self.state = "BRIEFING"
+        else: self.start_level_gameplay()
+
+    def start_level_gameplay(self):
+        self.state = "PLAYING"
+        self._init_level(self.current_level_index)
+        self.reset_game_state()
+        self.ghosts = []
+
+    def reset_game_state(self):
+        temp_ghosts = self.ghosts[:]
+        self._init_level(self.current_level_index)
+        self.ghosts = temp_ghosts
+        self.player = Player(self.start_pos[0], self.start_pos[1], COLOR_PLAYER)
+        self.current_frame = 0
+
+    def _init_level(self, lvl):
+        self.walls, self.boxes, self.buttons, self.doors, self.lasers = [], [], [], [], []
+        self.current_level_max_time = LEVEL_DURATIONS.get(lvl, DEFAULT_DURATION)
+        try:
+            base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            file_path = os.path.join(base_path, "levels", f"level{lvl}.txt")
+            with open(file_path, "r") as f:
+                lines = f.readlines()
+                for r, line in enumerate(lines):
+                    for c, char in enumerate(line):
+                        x, y = c * TILE_SIZE, r * TILE_SIZE
+                        if char == 'W': self.walls.append(Wall(x, y, COLOR_WALL))
+                        elif char == 'P': self.start_pos = (x, y)
+                        elif char == 'E': self.exit_point = Exit(x, y, COLOR_EXIT)
+                        elif char == 'B': self.boxes.append(Box(x, y, COLOR_BOX))
+                        elif char == 'L': self.lasers.append(Laser(x, y, COLOR_LASER, 'V'))
+                        elif char == 'H': self.lasers.append(Laser(x, y, COLOR_LASER, 'H'))
+                        elif char in ['1','2','3','4','5']: 
+                            self.buttons.append(Button(x, y, (255,255,255), int(char)))
+                        elif char in ['a','b','c','d','e']: 
+                            mapping = {'a':1, 'b':2, 'c':3, 'd':4, 'e':5}
+                            self.doors.append(Door(x, y, (255,255,255), mapping[char]))
+        except: self.state = "MENU"
+
+    def skip_intro(self): self.state = "MENU"
+    def toggle_pause(self): self.state = "PAUSED" if self.state == "PLAYING" else "PLAYING"
+    def full_restart(self): self.start_level_sequence()
+    def next_level(self): 
+        SaveManager.save_progress(self.current_level_index)
+        self.save_data = SaveManager.load_data()
+        self.unlocked_levels = self.save_data.get("unlocked_levels", 1)
+        self.current_level_index += 1
+        self.start_level_sequence()
+
     def get_render_data(self):
-        return {
-            "player": getattr(self, 'player', None),
-            "ghosts": self.ghosts,
-            "walls": self.walls,
-            "buttons": self.buttons,
-            "doors": self.doors,
-            "exit": self.exit_point,
-            "time_left": self.current_level_max_time - self.current_frame if hasattr(self, 'current_frame') else 0,
+        data = {
             "state": self.state,
+            "texts": self.texts,
+            "current_frame": self.current_frame,
+            "max_time": self.current_level_max_time,
             "level_index": self.current_level_index,
-            "unlocked_levels": self.unlocked_levels
+            "unlocked_levels": self.unlocked_levels,
+            "time_left": (self.current_level_max_time - self.current_frame) // 60 
         }
+        if self.state in ["PLAYING", "PAUSED", "GAME_OVER", "WON"]:
+            data.update({
+                "player": self.player, "walls": self.walls, "ghosts": self.ghosts,
+                "boxes": self.boxes, "buttons": self.buttons, "doors": self.doors,
+                "lasers": self.lasers, "exit": self.exit_point 
+            })
+        return data

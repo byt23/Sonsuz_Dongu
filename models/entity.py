@@ -5,54 +5,78 @@ class Entity:
     def __init__(self, x, y, color):
         self.rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
         self.color = color
-        self.history = []
-
-    def record_position(self):
-        self.history.append((self.rect.x, self.rect.y))
 
 class Player(Entity):
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
-        # Hitbox ayarı
-        hitbox_size = 50 
-        offset = (TILE_SIZE - hitbox_size) // 2
-        self.rect = pygame.Rect(x + offset, y + offset, hitbox_size, hitbox_size)
+        self.history = [] 
+        
+        # --- DÜZELTME BURADA ---
+        # Eskiden 0.8 idi, şimdi 0.65 yaptık.
+        # Bu sayede kapılardan geçerken sağa sola takılma payı oluştu.
+        size = int(TILE_SIZE * 0.65) 
+        
+        offset = (TILE_SIZE - size) // 2
+        self.rect = pygame.Rect(x + offset, y + offset, size, size)
+
+    def record_position(self):
+        self.history.append(self.rect.topleft)
 
 class Ghost(Entity):
     def __init__(self, history, color):
-        start_x, start_y = history[0]
-        super().__init__(start_x, start_y, color)
-        hitbox_size = 50
-        self.rect = pygame.Rect(start_x, start_y, hitbox_size, hitbox_size)
-        self.full_history = history
-    
-    def update_position_from_history(self, frame_index):
-        if frame_index < len(self.full_history):
-            self.rect.x, self.rect.y = self.full_history[frame_index]
+        super().__init__(0, 0, color)
+        self.history = history
+        # Hayalet de oyuncuyla aynı boyutta olsun
+        size = int(TILE_SIZE * 0.65)
+        self.rect = pygame.Rect(0, 0, size, size)
+        if history: self.rect.topleft = history[0]
 
-class Wall(Entity):
+    def update_position_from_history(self, frame):
+        if frame < len(self.history):
+            self.rect.topleft = self.history[frame]
+        else:
+            if self.history: self.rect.topleft = self.history[-1]
+
+class Wall(Entity): pass
+
+class Box(Entity):
     def __init__(self, x, y, color):
         super().__init__(x, y, color)
+        pad = 2
+        self.rect = pygame.Rect(x+pad, y+pad, TILE_SIZE-pad*2, TILE_SIZE-pad*2)
+
+class Exit(Entity):
+    def __init__(self, x, y, color):
+        super().__init__(x, y, color)
+        size = int(TILE_SIZE * 0.5)
+        offset = (TILE_SIZE - size) // 2
+        self.rect = pygame.Rect(x + offset, y + offset, size, size)
 
 class Button(Entity):
     def __init__(self, x, y, color, link_id):
         super().__init__(x, y, color)
         self.link_id = link_id
-        
-        self.is_pressed = False   # Butonun AÇIK/KAPALI durumu (Işık gibi)
-        self.was_occupied = False # YENİ: Bir önceki karede üzerinde biri var mıydı?
-        
-        shrink = 20 
-        self.rect = self.rect.inflate(-shrink*2, -shrink*2)
+        self.is_pressed = False
+        self.was_occupied = False 
+        size = int(TILE_SIZE * 0.6)
+        offset = (TILE_SIZE - size) // 2
+        self.rect = pygame.Rect(x + offset, y + offset, size, size)
 
 class Door(Entity):
     def __init__(self, x, y, color, link_id):
         super().__init__(x, y, color)
         self.link_id = link_id
         self.is_open = False
+        self.rect = pygame.Rect(x, y, TILE_SIZE, TILE_SIZE)
 
-class Exit(Entity):
-    def __init__(self, x, y, color):
+class Laser(Entity):
+    def __init__(self, x, y, color, axis):
         super().__init__(x, y, color)
-        shrink = 20
-        self.rect = self.rect.inflate(-shrink*2, -shrink*2)
+        self.axis = axis 
+        self.active = True
+        thickness = int(TILE_SIZE * 0.25)
+        center = (TILE_SIZE - thickness) // 2
+        if self.axis == 'V': 
+            self.rect = pygame.Rect(x + center, y, thickness, TILE_SIZE)
+        else: 
+            self.rect = pygame.Rect(x, y + center, TILE_SIZE, thickness)
